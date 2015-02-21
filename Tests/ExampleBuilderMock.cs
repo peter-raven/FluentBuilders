@@ -3,18 +3,24 @@ using BuildBuddy.Core;
 
 namespace BuildBuddy.Tests
 {
-    public class BuilderMock : BuilderSetup<BuilderMock, ExampleClass>
+    public class ExampleBuilderMock : Builder<ExampleClass>
     {
         public bool WasAskedToConstruct { get; set; }
         public List<int> WasAskedToConstructWithSeeds { get; private set; }
+        public string Something { get; set; }
 
-        public BuilderMock()
+        public ExampleBuilderMock() : this(new SimpleBuilderManager())
+        {
+        }
+
+        public ExampleBuilderMock(IBuilderManager mgr) : base(mgr)
         {
             WasAskedToConstructWithSeeds = new List<int>();
         }
 
-        public BuilderMock WithSomething(string something)
+        public ExampleBuilderMock WithSomething(string something)
         {
+            Something = something;
             return this;
         }
 

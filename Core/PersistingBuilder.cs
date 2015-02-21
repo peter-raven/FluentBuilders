@@ -1,15 +1,20 @@
-﻿namespace BuildBuddy.Core
-{
-    public abstract class PersistingBuilderSetup<TBuilder, TSubject> : BuilderSetup<TBuilder, TSubject>
-        where TSubject : class
-        where TBuilder : class
-    {
-        protected bool Persist { get; set; }
+﻿using System;
 
-        public TBuilder Persisted()
+namespace BuildBuddy.Core
+{
+    public abstract class PersistingBuilder<TSubject> : Builder<TSubject>, IPersistingBuilder
+        where TSubject : class
+    {
+        public bool Persist { get; set; }
+
+        protected PersistingBuilder(IBuilderManager mgr) : base(mgr)
         {
-            Persist = true;
-            return this as TBuilder;
+        }
+
+        public new PersistingBuilder<TSubject> Customize(Action<TSubject> action)
+        {
+            Customizations.Add(action);
+            return this;
         }
 
         public override TSubject Create(int seed = 0)

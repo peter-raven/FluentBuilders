@@ -2,32 +2,32 @@
 
 namespace BuildBuddy.Core
 {
-    public class BuilderTuple<T, TFactory>
+    public class BuilderTuple<T, TBuilder>
         where T : class
-        where TFactory : BuilderSetup<TFactory, T>
+        where TBuilder : Builder<T>
     {
         public T Instance { get; private set; }
-        public TFactory Factory { get; private set; }
+        public TBuilder Builder { get; private set; }
 
         public BuilderTuple(T instance)
         {
             Instance = instance;
-            Factory = null;
+            Builder = null;
         }
 
-        public BuilderTuple(TFactory factory)
+        public BuilderTuple(TBuilder builder)
         {
             Instance = null;
-            Factory = factory;
+            Builder = builder;
         }
 
-        public T Resolve(Action<TFactory> factoryOpts = null)
+        public T Resolve(Action<TBuilder> factoryOpts = null)
         {
             if (Instance != null)
                 return Instance;
             if (factoryOpts != null)
-                factoryOpts(Factory);
-            return Factory.Create();
+                factoryOpts(Builder);
+            return Builder.Create();
         }
     }
 }

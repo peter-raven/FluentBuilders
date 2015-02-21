@@ -4,9 +4,9 @@ using System.Linq;
 
 namespace BuildBuddy.Core
 {
-    public class BuilderList<TItem, TFactory> : List<BuilderTuple<TItem, TFactory>>
+    public class BuilderList<TItem, TBuilder> : List<BuilderTuple<TItem, TBuilder>>
         where TItem : class
-        where TFactory : BuilderSetup<TFactory, TItem>
+        where TBuilder : Builder<TItem>
     {
         public int CreatorsWithReadyInstanceCount()
         {
@@ -15,10 +15,10 @@ namespace BuildBuddy.Core
 
         public int CreatorsUsingFactoryCount()
         {
-            return this.Count(x => x.Factory != null);
+            return this.Count(x => x.Builder != null);
         }
 
-        public void AppendResolvedTo(ICollection<TItem> col, Action<TFactory> factoryOpts = null)
+        public void AppendResolvedTo(ICollection<TItem> col, Action<TBuilder> factoryOpts = null)
         {
             foreach (var item in this)
                 col.Add(item.Resolve(factoryOpts));

@@ -3,57 +3,59 @@ using System.Collections.Generic;
 
 namespace BuildBuddy.Core
 {
-    public class CollectionBuilder<TParentFactory, T, TFactory>
-        where TParentFactory : BuilderSetupBase
-        where T : class
-        where TFactory : BuilderSetup<TFactory, T>
-    {
-        private readonly TParentFactory _parentFactory;
-        private readonly Func<TFactory> _factoryResolver;
-        private readonly BuilderList<T, TFactory> _builders;
+    // xyz.WithOrderLines(x => x.AddOne())
 
-        public CollectionBuilder(TParentFactory parentFactory, Func<TFactory> factoryResolver = null)
+    public class CollectionBuilder<TParentBuilder, T, TBuilder>
+        where T : class
+        where TParentBuilder : IBuilder
+        where TBuilder : Builder<T>
+    {
+        private readonly TParentBuilder _parentFactory;
+        private readonly Func<TBuilder> _factoryResolver;
+        private readonly BuilderList<T, TBuilder> _builders;
+
+        public CollectionBuilder(TParentBuilder parentFactory)
         {
             _parentFactory = parentFactory;
-            _factoryResolver = (() => _parentFactory.BuilderManager.ConstructUsing<TFactory>());
-            _builders = new BuilderList<T, TFactory>();
+            _factoryResolver = _parentFactory.BuildUsing<TBuilder>;
+            _builders = new BuilderList<T, TBuilder>();
         }
 
-        public BuilderList<T, TFactory> Builders
+        public BuilderList<T, TBuilder> Builders
         {
             get { return _builders; }
         }
 
-        public TParentFactory AddOne()
+        public TParentBuilder AddOne()
         {
             return AddMany(1);
         }
 
-        public TParentFactory AddOne(T toAdd)
+        public TParentBuilder AddOne(T toAdd)
         {
             return AddMany(new[] { toAdd });
         }
 
-        public TParentFactory AddOne(Action<TFactory> opts)
+        public TParentBuilder AddOne(Action<TBuilder> opts)
         {
             return AddMany(1, opts);
         }
 
-        public TParentFactory AddMany(IEnumerable<T> addItems)
+        public TParentBuilder AddMany(IEnumerable<T> addItems)
         {
             foreach (var a in addItems)
-                _builders.Add(new BuilderTuple<T, TFactory>(a));
+                _builders.Add(new BuilderTuple<T, TBuilder>(a));
             return _parentFactory;
         }
 
-        public TParentFactory AddMany(int count, Action<TFactory> opts = null)
+        public TParentBuilder AddMany(int count, Action<TBuilder> opts = null)
         {
             for (int i = 0; i < count; i++)
             {
                 var fac = _factoryResolver();
                 if (opts != null)
                     opts(fac);
-                _builders.Add(new BuilderTuple<T, TFactory>(fac));
+                _builders.Add(new BuilderTuple<T, TBuilder>(fac));
             }
             return _parentFactory;
         }

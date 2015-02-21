@@ -57,11 +57,15 @@
     <Compile Include="..\SolutionInfo.cs">
       <Link>Properties\SolutionInfo.cs</Link>
     </Compile>
-    <Compile Include="When_Creating_A_Builder_Using_BuildBuddy.cs" />
+    <Compile Include="ExampleChildBuilderMock.cs" />
+    <Compile Include="ExampleChildClass.cs" />
+    <Compile Include="When_A_BuilderTuple_Is_Instantiated.cs" />
+    <Compile Include="When_Creating_A_Builder_Using_BuildManager.cs" />
     <Compile Include="ExampleClass.cs" />
-    <Compile Include="BuilderMock.cs" />
+    <Compile Include="ExampleBuilderMock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="When_Builder_Create_Is_Invoked.cs" />
+    <Compile Include="When_Having_A_CollectionBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
