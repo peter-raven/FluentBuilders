@@ -59,7 +59,6 @@
     </Compile>
     <Compile Include="ExampleChildBuilderMock.cs" />
     <Compile Include="ExampleChildClass.cs" />
-    <Compile Include="When_A_BuilderTuple_Is_Instantiated.cs" />
     <Compile Include="When_Creating_A_Builder_Using_BuildManager.cs" />
     <Compile Include="ExampleClass.cs" />
     <Compile Include="ExampleBuilderMock.cs" />

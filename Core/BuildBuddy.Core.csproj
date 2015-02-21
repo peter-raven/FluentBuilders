@@ -47,8 +47,6 @@
     </Compile>
     <Compile Include="BuilderExtensions.cs" />
     <Compile Include="CollectionBuilder.cs" />
-    <Compile Include="BuilderTuple.cs" />
-    <Compile Include="BuilderList.cs" />
     <Compile Include="Builder.cs" />
     <Compile Include="IBuilder.cs" />
     <Compile Include="IBuilderManager.cs" />
@@ -56,7 +54,8 @@
     <Compile Include="IPersistingBuilder.cs" />
     <Compile Include="PersistingBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SimpleServiceLocator.cs" />
+    <Compile Include="ServiceLocatingBuildBuddy.cs" />
+    <Compile Include="BuildBuddy.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

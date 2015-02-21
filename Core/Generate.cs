@@ -4,8 +4,16 @@ using System.Text;
 
 namespace BuildBuddy.Core
 {
+    /// <summary>
+    /// Generators for random stuff
+    /// </summary>
     public static class Generate
     {
+        /// <summary>
+        /// Generates a string containing the notorious Lorem Ipsum text, truncated to the length specified.
+        /// </summary>
+        /// <param name="length">Length of the string</param>
+        /// <returns></returns>
         public static string LoremIpsum(int length)
         {
             string lorem = loremIpsum;
@@ -14,6 +22,11 @@ namespace BuildBuddy.Core
             return lorem.Substring(0, length);
         }
 
+        /// <summary>
+        /// Generates a completely random string.
+        /// </summary>
+        /// <param name="length">Length of the string.</param>
+        /// <returns></returns>
         public static string RandomString(int length)
         {
             string randomString = string.Empty;
@@ -27,6 +40,11 @@ namespace BuildBuddy.Core
             return randomString.Substring(0, length);
         }
 
+        /// <summary>
+        /// Generates a string containing only digits.
+        /// </summary>
+        /// <param name="length">Length of the string.</param>
+        /// <returns></returns>
         public static string RandomNumberString(int length)
         {
             StringBuilder sb = new StringBuilder();
@@ -38,10 +56,15 @@ namespace BuildBuddy.Core
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Generates a random number.
+        /// </summary>
+        /// <param name="max">Maximum value to generate.</param>
+        /// <returns></returns>
         public static int RandomNumber(int max)
         {
             var rnd = new Random();
-            return rnd.Next(max);
+            return rnd.Next(max + 1);
         }
 
         private static string loremIpsum = @"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean vel elit massa, ac accumsan eros. Etiam mollis tempor magna ac dictum. Pellentesque eget ligula ante, et dictum neque. Fusce faucibus commodo lacus ut accumsan. Etiam condimentum leo et neque ornare adipiscing. Curabitur vel consectetur metus. Vivamus dignissim luctus mauris. Morbi auctor ante vel arcu tincidunt eget dapibus ante malesuada. Aenean at ligula ut elit varius adipiscing. Etiam sit amet massa a arcu egestas vehicula. In sed mi mauris. In tempor laoreet ante, id tempus magna fermentum id. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.

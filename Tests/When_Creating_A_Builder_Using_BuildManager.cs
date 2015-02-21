@@ -18,7 +18,7 @@ namespace BuildBuddy.Tests
             var serviceLocator = Substitute.For<IServiceLocator>();
             serviceLocator.GetInstance<ExampleBuilderMock>().Returns(new ExampleBuilderMock());
 
-            var manager = new ServiceLocatingBuilderManager(serviceLocator);
+            var manager = new ServiceLocatingBuildBuddy(serviceLocator);
             manager.BuildUsing<ExampleBuilderMock>();
 
             serviceLocator.Received().GetInstance<ExampleBuilderMock>();
@@ -27,7 +27,7 @@ namespace BuildBuddy.Tests
         [Test]
         public void Created_Builder_Is_Returned()
         {
-            var manager = new SimpleBuilderManager();
+            var manager = new Core.BuildBuddy();
             var builder = manager.BuildUsing<ExampleBuilderMock>();
 
             builder.Should().BeOfType<ExampleBuilderMock>();
@@ -36,7 +36,7 @@ namespace BuildBuddy.Tests
         [Test]
         public void Created_Builder_References_Same_BuildManager()
         {
-            var manager = new SimpleBuilderManager();
+            var manager = new Core.BuildBuddy();
             var builder = manager.BuildUsing<ExampleBuilderMock>();
 
             builder.BuilderManager.Should().BeSameAs(manager);
@@ -45,7 +45,7 @@ namespace BuildBuddy.Tests
         [Test]
         public void Customizations_Are_Performed_On_Built_Instance()
         {
-            var manager = new SimpleBuilderManager();
+            var manager = new Core.BuildBuddy();
             string customString = Generate.RandomString(50);
             ExampleClass result = manager.BuildUsing<ExampleBuilderMock>()
                 .Customize(b => b.StringProp = customString)
@@ -57,7 +57,7 @@ namespace BuildBuddy.Tests
         [Test]
         public void Second_Create_Builds_A_Different_Instance()
         {
-            var manager = new SimpleBuilderManager();
+            var manager = new Core.BuildBuddy();
             ExampleBuilderMock builderMock = manager.BuildUsing<ExampleBuilderMock>();
             
             ExampleClass result1 = builderMock.Create();
@@ -69,7 +69,7 @@ namespace BuildBuddy.Tests
         [Test]
         public void Multiple_Creates_Pass_Seeds_To_Build_Method()
         {
-            var manager = new SimpleBuilderManager();
+            var manager = new Core.BuildBuddy();
             ExampleBuilderMock builderMock = manager.BuildUsing<ExampleBuilderMock>();
 
             builderMock.Create(42);
@@ -81,7 +81,7 @@ namespace BuildBuddy.Tests
         [Test]
         public void CreateMany_Builds_Different_Instances()
         {
-            var manager = new SimpleBuilderManager();
+            var manager = new Core.BuildBuddy();
             ExampleBuilderMock builderMock = manager.BuildUsing<ExampleBuilderMock>();
 
             ExampleClass[] results = builderMock.CreateMany(3).ToArray();
@@ -92,7 +92,7 @@ namespace BuildBuddy.Tests
         [Test]
         public void CreateMany_Pass_Sequental_Seeds_To_Build_Method()
         {
-            var manager = new SimpleBuilderManager();
+            var manager = new Core.BuildBuddy();
             ExampleBuilderMock builderMock = manager.BuildUsing<ExampleBuilderMock>();
 
             builderMock.CreateMany(3);

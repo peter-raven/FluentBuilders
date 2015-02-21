@@ -10,7 +10,7 @@ namespace BuildBuddy.Tests
         [Test]
         public void The_Concrete_Builder_Is_Asked_To_Construct()
         {
-            var manager = new SimpleBuilderManager();
+            var manager = new Core.BuildBuddy();
             var builder = manager.BuildUsing<ExampleBuilderMock>();
 
             builder.Create();
@@ -21,7 +21,7 @@ namespace BuildBuddy.Tests
         [Test]
         public void The_Concrete_Builder_Is_Asked_To_Construct_With_The_Given_Seed()
         {
-            var manager = new SimpleBuilderManager();
+            var manager = new Core.BuildBuddy();
             var builder = manager.BuildUsing<ExampleBuilderMock>();
 
             builder.Create(42);
@@ -32,7 +32,7 @@ namespace BuildBuddy.Tests
         [Test]
         public void The_Created_Instance_Matches_The_Factory_Generic()
         {
-            var manager = new SimpleBuilderManager();
+            var manager = new Core.BuildBuddy();
             var builder = manager.BuildUsing<ExampleBuilderMock>();
 
             object instance = builder.Create();

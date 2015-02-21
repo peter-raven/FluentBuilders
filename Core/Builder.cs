@@ -8,12 +8,20 @@ namespace BuildBuddy.Core
         where TSubject : class
     {
         protected readonly List<Action<TSubject>> Customizations;
+        protected TSubject Instance { get; set; }
         internal IBuilderManager BuilderManager { get; set; }
 
         protected Builder(IBuilderManager manager)
         {
             BuilderManager = manager;
+            Instance = null;
             Customizations = new List<Action<TSubject>>();
+        }
+
+        public Builder<TSubject> WithInstance(TSubject instance)
+        {
+            Instance = instance;
+            return this;
         }
 
         /// <summary>
@@ -34,7 +42,7 @@ namespace BuildBuddy.Core
         /// <returns></returns>
         public virtual TSubject Create(int seed = 0)
         {
-            TSubject subject = Build(seed);
+            TSubject subject = Instance ?? Build(seed);
             foreach (var cust in Customizations)
                 cust(subject);
             

@@ -1,26 +1,35 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using BuildBuddy.Core;
 
 namespace BuildBuddy.Tests
 {
     public class ExampleBuilderMock : Builder<ExampleClass>
     {
+        private CollectionBuilder<ExampleChildClass, ExampleChildBuilderMock> _childBuilders;
         public bool WasAskedToConstruct { get; set; }
         public List<int> WasAskedToConstructWithSeeds { get; private set; }
-        public string Something { get; set; }
-
-        public ExampleBuilderMock() : this(new SimpleBuilderManager())
+        public string _stringProp { get; set; }
+        
+        public ExampleBuilderMock() : this(new Core.BuildBuddy())
         {
         }
 
         public ExampleBuilderMock(IBuilderManager mgr) : base(mgr)
         {
             WasAskedToConstructWithSeeds = new List<int>();
+            _childBuilders = new CollectionBuilder<ExampleChildClass, ExampleChildBuilderMock>(this);
         }
 
-        public ExampleBuilderMock WithSomething(string something)
+        public ExampleBuilderMock WithStringProp(string something)
         {
-            Something = something;
+            _stringProp = something;
+            return this;
+        }
+
+        public ExampleBuilderMock WithChildren(Action<CollectionBuilder<ExampleChildClass, ExampleChildBuilderMock>> opts)
+        {
+            opts(_childBuilders);
             return this;
         }
 
@@ -28,7 +37,13 @@ namespace BuildBuddy.Tests
         {
             WasAskedToConstruct = true;
             WasAskedToConstructWithSeeds.Add(seed);
-            return new ExampleClass();
+            var res = new ExampleClass
+            {
+                StringProp = _stringProp
+            };
+            res.Children.AddRange(_childBuilders.CreateAll());
+
+            return res;
         }
     }
 }
