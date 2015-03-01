@@ -7,10 +7,6 @@ namespace BuildBuddy.Core
     {
         public bool Persist { get; set; }
 
-        protected PersistingBuilder(IBuilderManager mgr) : base(mgr)
-        {
-        }
-
         public new PersistingBuilder<TSubject> Customize(Action<TSubject> action)
         {
             Customizations.Add(action);

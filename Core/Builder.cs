@@ -4,24 +4,60 @@ using System.Linq.Expressions;
 
 namespace BuildBuddy.Core
 {
-    public abstract class Builder<TSubject> : IBuilder
+    public abstract class Builder<TSubject> : IBuilder<TSubject>
         where TSubject : class
     {
+        protected Dictionary<string, IBuilder> OptIns { get; set; } 
         protected readonly List<Action<TSubject>> Customizations;
         protected TSubject Instance { get; set; }
-        internal IBuilderManager BuilderManager { get; set; }
-
-        protected Builder(IBuilderManager manager)
+        public BuilderFactoryConvention BuilderFactoryConvention { get; set; }
+        
+        protected Builder()
         {
-            BuilderManager = manager;
-            Instance = null;
+            OptIns = new Dictionary<string, IBuilder>();
             Customizations = new List<Action<TSubject>>();
+            BuilderFactoryConvention = new BuilderFactoryConvention();
+            Instance = null;
         }
 
         public Builder<TSubject> WithInstance(TSubject instance)
         {
             Instance = instance;
             return this;
+        }
+
+        public void OptInWith<T>(Expression<Func<TSubject, object>> prop, T instance)
+        {
+            OptInWithBuilder(prop, new ObjectContainer<T>(instance));
+        }
+
+        public void OptInWith<TNestedBuilder>(Expression<Func<TSubject, object>> prop, Action<TNestedBuilder> opts = null) where TNestedBuilder : IBuilder
+        {
+            TNestedBuilder builder = BuildUsing<TNestedBuilder>();
+            if (opts != null)
+                opts(builder);
+            OptInWithBuilder<TNestedBuilder>(prop, builder);
+        }
+
+        private void OptInWithBuilder<TNestedBuilder>(Expression<Func<TSubject, object>> prop, TNestedBuilder builder) where TNestedBuilder : IBuilder
+        {
+            MemberExpression member = (MemberExpression)prop.Body;
+            string key = member.Member.Name;
+            if (OptIns.ContainsKey(key))
+                throw new InvalidOperationException(String.Format(
+                    "The builder was told to set property {0} of {1} more than once. " +
+                    "Now it does not know what to do." +
+                    "Check if you somehow asked the builder to set this property multiple times.", key, typeof(TSubject).Name));
+            OptIns.Add(key, builder);
+        }
+
+        protected T OptInFor<T>(Expression<Func<TSubject, T>> prop, Func<T> valueIfNoOptIn)
+        {
+            MemberExpression member = (MemberExpression)prop.Body;
+            string key = member.Member.Name;
+            if (!OptIns.ContainsKey(key))
+                return valueIfNoOptIn();
+            return (T) OptIns[key].Create();
         }
 
         /// <summary>
@@ -49,6 +85,11 @@ namespace BuildBuddy.Core
             return subject;
         }
 
+        object IBuilder.Create(int seed)
+        {
+            return Create(seed);
+        }
+
         public static implicit operator TSubject(Builder<TSubject> builder)
         {
             return builder.Create();
@@ -74,7 +115,7 @@ namespace BuildBuddy.Core
 
         public T BuildUsing<T>() where T : IBuilder
         {
-            return BuilderManager.BuildUsing<T>();
+            return BuilderFactoryConvention.Create<T>();
         }
     }
 }

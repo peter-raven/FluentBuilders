@@ -36,9 +36,6 @@
     <Reference Include="FluentAssertions.Core">
       <HintPath>..\packages\FluentAssertions.3.2.2\lib\net45\FluentAssertions.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Practices.ServiceLocation">
-      <HintPath>..\packages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
-    </Reference>
     <Reference Include="NSubstitute">
       <HintPath>..\packages\NSubstitute.1.8.1.0\lib\net45\NSubstitute.dll</HintPath>
     </Reference>
@@ -57,11 +54,11 @@
     <Compile Include="..\SolutionInfo.cs">
       <Link>Properties\SolutionInfo.cs</Link>
     </Compile>
-    <Compile Include="ExampleChildBuilderMock.cs" />
+    <Compile Include="ChildBuilderForTesting.cs" />
     <Compile Include="ExampleChildClass.cs" />
-    <Compile Include="When_Creating_A_Builder_Using_BuildManager.cs" />
+    <Compile Include="When_Builder_Uses_Custom_Builder_Factory_Convention.cs" />
     <Compile Include="ExampleClass.cs" />
-    <Compile Include="ExampleBuilderMock.cs" />
+    <Compile Include="BuilderForTesting.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="When_Builder_Create_Is_Invoked.cs" />
     <Compile Include="When_Having_A_CollectionBuilder.cs" />

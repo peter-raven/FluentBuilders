@@ -4,18 +4,6 @@ using System.Runtime.InteropServices;
 
 namespace BuildBuddy.Core
 {
-    // var x = new SimpleBuildManager().BuildUsing<MyBuilder>()
-    //      .WithOrderlines(ol => ol
-    //          .AddOne(x => x
-    //            .WithSomething()))
-    //      .Create();      
-
-    // var x = new SimpleBuildManager().BuildUsing<MyBuilder>()
-    //      .WithOrderlines(ol => ol
-    //          .AddOne()
-    //            .WithSomething())
-    //      .Create(); 
-
     /// <summary>
     /// Helper for building child collections to your entity. Use this to expose a fluent syntax for building up child collections.
     /// </summary>
