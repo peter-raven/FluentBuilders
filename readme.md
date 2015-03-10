@@ -26,7 +26,7 @@ Order order = new OrderBuilder()
     .Create();
 ```
 
-The real beauty of test data builders is that by using the right conventions, you will get very focused test setups that are easy to write and easy to read.
+The real beauty of test data builders is that by using the right conventions, you will get very focused test setups that are easy to write and easy to read. Test data builders are also great for extensibility and structuring of even complex test setups.
 
 ```csharp
 // Automatically creates parent order, associated product, etc.
@@ -62,7 +62,7 @@ This way you only need to opt-in with the settings of your builder that are rele
 
 ##Creating a builder
 
-To create a builder, inherit from the Builder base class and implement the Build method:
+To create a builder, inherit from the `Builder` base class and implement the `Build` method:
 
 ```csharp
 public class ProductBuilder : Builder<Product>
@@ -111,7 +111,7 @@ public class ProductBuilder : Builder<Product>
 Notice how the Build method uses the opt-in if present using another helper method `OptInFor`, otherwise it sets a default value. This way the valid-object principle is kept.
 
 ##Nesting builders
-Notice how this builder exampe uses a nested builder to create a related entity (customer) if a specific one was not supplied (using the `BuildUsing` base method). This way if the builder was not set up with .WithCustomer, it will create a default one itself, ensuring that a valid Order object is created.
+Notice how this builder example uses a nested builder to create a related entity (customer) if a specific one was not supplied (using the `BuildUsing` base method). This way if the builder was not set up with .WithCustomer, it will create a default one itself, ensuring that a valid Order object is created.
 
 ```csharp
 public class OrderBuilder : Builder<Order>
@@ -138,8 +138,10 @@ public class OrderBuilder : Builder<Order>
 Another good practice is to allow opt-in on the nested builders, so you can do:
 
 ```csharp
+// Order should have a customer that is outside EU,
+// everything else will be valid defaults.
 Order myOrder = new OrderBuilder()
-    .WithCustomer(c => c.OutsideEU()) // Order should have a customer that is outside EU, everything else will be valid defaults.
+    .WithCustomer(c => c.OutsideEU())
     .Create();
 ```
 
@@ -172,10 +174,11 @@ var myOrder = BuildUsing<OrderBuilder>
     .WithOrderLines(x => x.AddOne()) // build a default order line and add it
     .WithOrderLines(x => x.AddOne(myOrderLine)) // add my specific order line
     .WithOrderLines(x => x.AddOne(y => y.WithAmount(10))) // build an order line with the specified opt-in for the order line builder
+    .WithOrderLines(x => x.AddMany(3)) // build 3 unique order lines and add them
     .Create()
 ```
 
-For this you need to use the CollectionBuilder:
+For this you need to use the `CollectionBuilder`:
 
 ```csharp
 public class OrderBuilder : Builder<Order>
@@ -192,6 +195,7 @@ public class OrderBuilder : Builder<Order>
     public OrderBuilder WithOrderLines(Action<CollectionBuilder<OrderLine, OrderLineBuilder>> opts)
     {
         opts(_orderLineBuilders);
+        return this;
     }
 
     public override Order Build(int seed)
@@ -214,15 +218,15 @@ var product = new ProductBuilder(myPersistenceSession)
     .Create() // Now the instance is in the database also :-)
 ```
 
-To support persistence, inherit the from PersistingBuilder class. This extended base class will extend the build flow with persistence. It will go through these steps:
+To support persistence, inherit the from `PersistingBuilder` class. This extended base class will extend the build flow with persistence. It will go through these steps:
 
 1. Create the instance by calling Build method
 2. Persist the instance by calling Save method
 3. Do any optional post-persist operations by invoking method PostPersist.
 
-The persisting and post-persist parts are only invoked if the builder has the property Persist set, this can also be done by chaining .Persisted() to the fluent syntax.
+The persisting and post-persist parts are only invoked if the builder has the property `Persist` set, this can also be done by chaining `.Persisted()` to the fluent syntax.
 
-The PersistingBuilder does not know how objects are persisted, it only ensures the correct flow, so you have to provide the details in the builder. Usage example (NHibernate):
+The `PersistingBuilder` does not know how objects are persisted, it only ensures the correct flow, so you have to provide the details in the builder. Usage example (NHibernate):
 
 ```csharp
 public class ProductBuilder : PersistingBuilder<Product>
@@ -254,7 +258,8 @@ public class ProductBuilder : PersistingBuilder<Product>
 
     public override void PostPersist(Product product)
     {
-        // Do anything that can only be done after persisting, fx. add child entities that require
+        // Do anything that can only be done after persisting,
+        // fx. add child entities that require
         // parent entity to be persisted first.
     }
 }
@@ -264,7 +269,8 @@ public class ProductBuilder : PersistingBuilder<Product>
 In integration tests you often want the builders to support more advanced scenarios, where part of the building could include calling services, do messaging and using persistence. Put all dependencies of your builder in it's constructor, and instantiate the builder classes through your IoC of choice. Most IoC containers support doing like this even without any registration:
 
 ```csharp
-// Instantiates an OrderBuilder, and resolves any of it's constructor parameters using the IoC.
+// Instantiates an OrderBuilder, and resolves any of
+// it's constructor parameters using the IoC.
 Order myOrder = MyIocOfChoice.Resolve<OrderBuilder>()
     .Create();
 ```

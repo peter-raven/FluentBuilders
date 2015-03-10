@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BuildBuddy.Core</RootNamespace>
     <AssemblyName>BuildBuddy.Core</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <Framework Condition=" '$(Framework)' == '' ">NET45</Framework>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,6 +30,23 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <DocumentationFile>bin\Release\NET45\BuildBuddy.Core.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="  '$(Framework)' == 'NET45' ">
+    <DefineConstants>NET45</DefineConstants>
+    <OutputPath>bin\$(Configuration)\$(Framework)</OutputPath>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="  '$(Framework)' == 'NET40' ">
+    <DefineConstants>NET40</DefineConstants>
+    <OutputPath>bin\$(Configuration)\$(Framework)</OutputPath>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="  '$(Framework)' == 'NET35' ">
+    <DefineConstants>NET35</DefineConstants>
+    <OutputPath>bin\$(Configuration)\$(Framework)</OutputPath>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -63,4 +82,8 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <Target Name="AfterBuild">
+    <MSBuild Condition=" '$(Framework)' == 'NET45'" Projects="$(MSBuildProjectFile)" Properties="Framework=NET40" RunEachTargetSeparately="true" />
+    <MSBuild Condition=" '$(Framework)' == 'NET40'" Projects="$(MSBuildProjectFile)" Properties="Framework=NET35" RunEachTargetSeparately="true" />
+  </Target>
 </Project>
