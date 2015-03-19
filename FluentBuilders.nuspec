@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>FluentBuilders</id>
+    <version>0.8.0.0</version>
+    <title>Fluent Builders</title>
+    <authors>Peter Ravnholt</authors>
+    <owners>peter_r</owners>
+    <licenseUrl>https://github.com/peter-raven/FluentBuilders/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/peter-raven/FluentBuilders</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Fluent Builders is a helper library for Test Data Builder classes, enabling you to make powerful and reusable fluent-style builders for your tests in no time.</description>
+  </metadata>
+  <files>
+    <file src="Core\bin\Release\net35\FluentBuilders.Core.dll" target="lib\net35" />
+    <file src="Core\bin\Release\net35\FluentBuilders.Core.pdb" target="lib\net35" />
+    <file src="Core\bin\Release\net35\FluentBuilders.Core.XML" target="lib\net35" />
+    <file src="Core\bin\Release\net40\FluentBuilders.Core.dll" target="lib\net40" />
+    <file src="Core\bin\Release\net40\FluentBuilders.Core.pdb" target="lib\net40" />
+    <file src="Core\bin\Release\net40\FluentBuilders.Core.XML" target="lib\net40" />
+    <file src="Core\bin\Release\net45\FluentBuilders.Core.dll" target="lib\net45" />
+    <file src="Core\bin\Release\net45\FluentBuilders.Core.pdb" target="lib\net45" />
+    <file src="Core\bin\Release\net45\FluentBuilders.Core.XML" target="lib\net45" />
+  </files>
+</package>
