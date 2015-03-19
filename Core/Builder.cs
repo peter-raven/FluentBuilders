@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
-namespace BuildBuddy.Core
+namespace FluentBuilders.Core
 {
     public abstract class Builder<TSubject> : IBuilder<TSubject>
         where TSubject : class

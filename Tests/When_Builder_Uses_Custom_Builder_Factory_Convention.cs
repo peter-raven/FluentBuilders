@@ -1,10 +1,10 @@
 ﻿using System.Linq;
-using BuildBuddy.Core;
 using FluentAssertions;
+using FluentBuilders.Core;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace BuildBuddy.Tests
+namespace FluentBuilders.Tests
 {
     [TestFixture]
     public class When_Builder_Uses_Custom_Builder_Factory_Convention

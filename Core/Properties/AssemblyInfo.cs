@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("BuildBuddy")]
+[assembly: AssemblyTitle("FluentBuilders")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyCulture("")]
 
@@ -17,4 +17,4 @@ using System.Runtime.InteropServices;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("9f31337d-cbe6-4ca9-841b-3e2bd2df23fe")]
 
-[assembly: InternalsVisibleTo("BuildBuddy.Tests")]
+[assembly: InternalsVisibleTo("FluentBuilders.Tests")]

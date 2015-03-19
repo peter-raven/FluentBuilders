@@ -1,8 +1,8 @@
-﻿using BuildBuddy.Core;
-using FluentAssertions;
+﻿using FluentAssertions;
+using FluentBuilders.Core;
 using NUnit.Framework;
 
-namespace BuildBuddy.Tests
+namespace FluentBuilders.Tests
 {
     [TestFixture]
     public class When_Having_A_CollectionBuilder

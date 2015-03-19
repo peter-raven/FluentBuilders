@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BuildBuddy.Core
+namespace FluentBuilders.Core
 {
     public abstract class PersistingBuilder<TSubject> : Builder<TSubject>, IPersistingBuilder
         where TSubject : class

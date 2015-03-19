@@ -1,4 +1,4 @@
-namespace BuildBuddy.Core
+namespace FluentBuilders.Core
 {
     public interface IBuilder
     {

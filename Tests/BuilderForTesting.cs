@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using BuildBuddy.Core;
+using FluentBuilders.Core;
 
-namespace BuildBuddy.Tests
+namespace FluentBuilders.Tests
 {
     public class BuilderForTesting : Builder<ExampleClass>
     {

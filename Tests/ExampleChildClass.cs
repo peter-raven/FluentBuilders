@@ -1,4 +1,4 @@
-﻿namespace BuildBuddy.Tests
+﻿namespace FluentBuilders.Tests
 {
     public class ExampleChildClass
     {

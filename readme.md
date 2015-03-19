@@ -1,9 +1,9 @@
-Build Buddy
-===========
+Fluent Builders
+===============
 
-Build Buddy is a lightweight library for creating [Test Data Builders](http://www.natpryce.com/articles/000714.html) to be used in your tests.
+Fluent Builders is a lightweight library for creating [Test Data Builders](http://www.natpryce.com/articles/000714.html) to be used in your tests.
 
-By using a BuildBuddy-backed Test Data Builder inside your test, you will be able to make setups like this:
+By using a FluentBuilders-backed Test Data Builder inside your test, you will be able to make setups like this:
 
 ```csharp
 Product product = new ProductBuilder()
@@ -13,7 +13,7 @@ Product product = new ProductBuilder()
     .Create();
 ```
 
-A builder uses a base class from the BuildBuddy library and can take advantage of a few convenience helpers. You will be able to easily create advanced builders that handle complex types, child collections and nesting like this:
+A builder uses a base class from the FluentBuilders library and can take advantage of a few convenience helpers. You will be able to easily create advanced builders that handle complex types, child collections and nesting like this:
 
 ```csharp
 Order order = new OrderBuilder()
@@ -41,9 +41,9 @@ OrderLine orderLine = new OrderLineBuilder()
 
 ##Getting started
 
-To start using BuildBudy, fork this repository or use nuget:
+To start using FluentBuilders, fork this repository or use nuget:
 
-    install-package buildbuddy
+    install-package FluentBuilders
 
 ##Test Data Building Approaches
 

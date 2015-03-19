@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BuildBuddy.Core
+namespace FluentBuilders.Core
 {
     public static class BuilderExtensions
     {

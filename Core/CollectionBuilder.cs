@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace BuildBuddy.Core
+namespace FluentBuilders.Core
 {
     /// <summary>
     /// Helper for building child collections to your entity. Use this to expose a fluent syntax for building up child collections.

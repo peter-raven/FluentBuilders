@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace BuildBuddy.Core
+namespace FluentBuilders.Core
 {
     /// <summary>
     /// Generators for random stuff

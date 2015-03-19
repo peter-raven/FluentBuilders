@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace BuildBuddy.Core
+namespace FluentBuilders.Core
 {
     public class SimpleBuilderFactory : IBuilderFactory
     {
