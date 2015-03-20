@@ -4,6 +4,10 @@ using System.Linq.Expressions;
 
 namespace FluentBuilders.Core
 {
+    /// <summary>
+    /// Abstract base class for fluent builders.
+    /// </summary>
+    /// <typeparam name="TSubject">Type of object this builder will build.</typeparam>
     public abstract class Builder<TSubject> : IBuilder<TSubject>
         where TSubject : class
     {
@@ -20,18 +24,35 @@ namespace FluentBuilders.Core
             Instance = null;
         }
 
+        /// <summary>
+        /// Instructs the builder to return the specified instance each time Create is invoked.
+        /// </summary>
+        /// <param name="instance">Fixed instance to return</param>
+        /// <returns></returns>
         public Builder<TSubject> WithInstance(TSubject instance)
         {
             Instance = instance;
             return this;
         }
 
-        public void OptInWith<T>(Expression<Func<TSubject, object>> prop, T instance)
+        /// <summary>
+        /// Instructs the builder to set the specified property of the created instance to a specific value.
+        /// </summary>
+        /// <typeparam name="T">The property's type</typeparam>
+        /// <param name="prop">Lambda expression pointing out the property</param>
+        /// <param name="instance">The instance/value for the property</param>
+        protected void OptInWith<T>(Expression<Func<TSubject, object>> prop, T instance)
         {
             OptInWithBuilder(prop, new ObjectContainer<T>(instance));
         }
 
-        public void OptInWith<TNestedBuilder>(Expression<Func<TSubject, object>> prop, Action<TNestedBuilder> opts = null) where TNestedBuilder : IBuilder
+        /// <summary>
+        /// Instructs the builder that the specified property should be set using a nested builder, with optional settings on the nested builder.
+        /// </summary>
+        /// <typeparam name="TNestedBuilder">Type of nested builder</typeparam>
+        /// <param name="prop">Lambda expression pointing out the property</param>
+        /// <param name="opts">Optional actions to perform on the nested builder.</param>
+        protected void OptInWith<TNestedBuilder>(Expression<Func<TSubject, object>> prop, Action<TNestedBuilder> opts = null) where TNestedBuilder : IBuilder
         {
             TNestedBuilder builder = BuildUsing<TNestedBuilder>();
             if (opts != null)
@@ -46,11 +67,18 @@ namespace FluentBuilders.Core
             if (OptIns.ContainsKey(key))
                 throw new InvalidOperationException(String.Format(
                     "The builder was told to set property {0} of {1} more than once. " +
-                    "Now it does not know what to do." +
+                    "Now it does not know what to do. " +
                     "Check if you somehow asked the builder to set this property multiple times.", key, typeof(TSubject).Name));
             OptIns.Add(key, builder);
         }
 
+        /// <summary>
+        /// Gets the value/instance set by opt-in for the specified property.
+        /// </summary>
+        /// <typeparam name="T">Type of the property</typeparam>
+        /// <param name="prop">Lambda expression pointing to the property</param>
+        /// <param name="valueIfNoOptIn">Value or instance to return if no opt-in was registered for the property.</param>
+        /// <returns></returns>
         protected T OptInFor<T>(Expression<Func<TSubject, T>> prop, Func<T> valueIfNoOptIn)
         {
             MemberExpression member = (MemberExpression)prop.Body;
@@ -113,6 +141,11 @@ namespace FluentBuilders.Core
 
         protected abstract TSubject Build(int seed);
 
+        /// <summary>
+        /// Creates a nested builder using the current builder factory convention.
+        /// </summary>
+        /// <typeparam name="T">Type of nested build to create.</typeparam>
+        /// <returns></returns>
         public T BuildUsing<T>() where T : IBuilder
         {
             return BuilderFactoryConvention.Create<T>();
