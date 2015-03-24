@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace FluentBuilders.Core
 {
@@ -13,7 +14,7 @@ namespace FluentBuilders.Core
     {
         protected Dictionary<string, IBuilder> OptIns { get; set; } 
         protected readonly List<Action<TSubject>> Customizations;
-        protected TSubject Instance { get; set; }
+        public TSubject Instance { get; set; }
         public BuilderFactoryConvention BuilderFactoryConvention { get; set; }
         
         protected Builder()
@@ -47,6 +48,17 @@ namespace FluentBuilders.Core
         }
 
         /// <summary>
+        /// Instructs the builder to keep a specific instance/value for later use, stored using a key.
+        /// </summary>
+        /// <typeparam name="T">Type of instance to keep</typeparam>
+        /// <param name="key">Key to use for storing</param>
+        /// <param name="instance">Instance to keep</param>
+        protected void OptInWith<T>(string key, T instance)
+        {
+            OptInWithBuilder(key, new ObjectContainer<T>(instance));
+        }
+
+        /// <summary>
         /// Instructs the builder that the specified property should be set using a nested builder, with optional settings on the nested builder.
         /// </summary>
         /// <typeparam name="TNestedBuilder">Type of nested builder</typeparam>
@@ -60,10 +72,29 @@ namespace FluentBuilders.Core
             OptInWithBuilder<TNestedBuilder>(prop, builder);
         }
 
+        /// <summary>
+        /// Instructs the builder that the specified key store the specified nested builder, with optional settings on the nested builder.
+        /// </summary>
+        /// <typeparam name="TNestedBuilder"></typeparam>
+        /// <param name="key"></param>
+        /// <param name="opts"></param>
+        protected void OptInWith<TNestedBuilder>(string key, Action<TNestedBuilder> opts = null) where TNestedBuilder : IBuilder
+        {
+            TNestedBuilder builder = BuildUsing<TNestedBuilder>();
+            if (opts != null)
+                opts(builder);
+            OptInWithBuilder<TNestedBuilder>(key, builder);
+        }
+
         private void OptInWithBuilder<TNestedBuilder>(Expression<Func<TSubject, object>> prop, TNestedBuilder builder) where TNestedBuilder : IBuilder
         {
             MemberExpression member = (MemberExpression)prop.Body;
             string key = member.Member.Name;
+            OptInWithBuilder(key, builder);
+        }
+
+        private void OptInWithBuilder<TNestedBuilder>(string key, TNestedBuilder builder) where TNestedBuilder : IBuilder
+        {
             if (OptIns.ContainsKey(key))
                 throw new InvalidOperationException(String.Format(
                     "The builder was told to set property {0} of {1} more than once. " +
@@ -86,6 +117,15 @@ namespace FluentBuilders.Core
             if (!OptIns.ContainsKey(key))
                 return valueIfNoOptIn();
             return (T) OptIns[key].Create();
+        }
+
+        protected T OptInFor<T>(Expression<Func<TSubject, T>> prop, T valueIfNoOptIn)
+        {
+            MemberExpression member = (MemberExpression)prop.Body;
+            string key = member.Member.Name;
+            if (!OptIns.ContainsKey(key))
+                return valueIfNoOptIn;
+            return (T)OptIns[key].Create();
         }
 
         /// <summary>

@@ -16,15 +16,32 @@ namespace FluentBuilders.Core
         private readonly Func<TBuilder> _factoryResolver;
         private readonly List<TBuilder> _builders;
 
+        /// <summary>
+        /// True if the collection builder was explicitly set to be empty, otherwise False.
+        /// </summary>
+        public bool ExplicitlyEmpty { get; set; }
+
         public CollectionBuilder(IBuilder parentFactory)
         {
             _factoryResolver = parentFactory.BuildUsing<TBuilder>;
             _builders = new List<TBuilder>();
         }
 
+        /// <summary>
+        /// List of builders that will construct this collection.
+        /// </summary>
         public List<TBuilder> Builders
         {
             get { return _builders; }
+        }
+
+        /// <summary>
+        /// Explictly state that this collection should remain empty.
+        /// </summary>
+        /// <returns></returns>
+        public void None()
+        {
+            ExplicitlyEmpty = true;
         }
 
         /// <summary>
