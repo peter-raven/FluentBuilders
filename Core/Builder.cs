@@ -96,11 +96,61 @@ namespace FluentBuilders.Core
         private void OptInWithBuilder<TNestedBuilder>(string key, TNestedBuilder builder) where TNestedBuilder : IBuilder
         {
             if (OptIns.ContainsKey(key))
-                throw new InvalidOperationException(String.Format(
-                    "The builder was told to set property {0} of {1} more than once. " +
-                    "Now it does not know what to do. " +
-                    "Check if you somehow asked the builder to set this property multiple times.", key, typeof(TSubject).Name));
+                OptIns.Remove(key);
             OptIns.Add(key, builder);
+        }
+
+        /// <summary>
+        /// Checks if an opt-in for the specified property exists.
+        /// </summary>
+        /// <typeparam name="T">The property's type.</typeparam>
+        /// <param name="prop">Lambda expression pointing out the property.</param>
+        /// <returns>True if an opt-in exists, otherwise, false.</returns>
+        protected bool HasOptInFor<T>(Expression<Func<TSubject, T>> prop)
+        {
+            MemberExpression member = (MemberExpression)prop.Body;
+            string key = member.Member.Name;
+            return HasOptInFor(key);
+        }
+
+        /// <summary>
+        /// Checks if an opt-in for the specified key exists.
+        /// </summary>
+        /// <param name="key">Key to check.</param>
+        /// <returns>True if an opt-in exists, otherwise, false.</returns>
+        protected bool HasOptInFor(string key)
+        {
+            if (!OptIns.ContainsKey(key))
+                return true;
+            return false;
+        }
+
+        /// <summary>
+        ///  Gets the value/instance set by opt-in for the specified key.
+        /// </summary>
+        /// <typeparam name="T">Type of the value/instance.</typeparam>
+        /// <param name="key">Key of the opt-in</param>
+        /// <param name="valueIfNoOptIn">Func that returns a default if no opt-in was registered for the specified key.</param>
+        /// <returns></returns>
+        protected T OptInFor<T>(string key, Func<T> valueIfNoOptIn)
+        {
+            if (!OptIns.ContainsKey(key))
+                return valueIfNoOptIn();
+            return (T)OptIns[key].Create();
+        }
+
+        /// <summary>
+        /// Gets the value/instance set by opt-in for the specified property.
+        /// </summary>
+        /// <typeparam name="T">Type of the property</typeparam>
+        /// <param name="prop">Lambda expression pointing to the property</param>
+        /// <param name="valueIfNoOptIn">Func that returns a default if no opt-in was registered for the property.</param>
+        /// <returns></returns>
+        protected T OptInFor<T>(Expression<Func<TSubject, T>> prop, Func<T> valueIfNoOptIn)
+        {
+            MemberExpression member = (MemberExpression)prop.Body;
+            string key = member.Member.Name;
+            return OptInFor(key, valueIfNoOptIn);
         }
 
         /// <summary>
@@ -110,22 +160,9 @@ namespace FluentBuilders.Core
         /// <param name="prop">Lambda expression pointing to the property</param>
         /// <param name="valueIfNoOptIn">Value or instance to return if no opt-in was registered for the property.</param>
         /// <returns></returns>
-        protected T OptInFor<T>(Expression<Func<TSubject, T>> prop, Func<T> valueIfNoOptIn)
-        {
-            MemberExpression member = (MemberExpression)prop.Body;
-            string key = member.Member.Name;
-            if (!OptIns.ContainsKey(key))
-                return valueIfNoOptIn();
-            return (T) OptIns[key].Create();
-        }
-
         protected T OptInFor<T>(Expression<Func<TSubject, T>> prop, T valueIfNoOptIn)
         {
-            MemberExpression member = (MemberExpression)prop.Body;
-            string key = member.Member.Name;
-            if (!OptIns.ContainsKey(key))
-                return valueIfNoOptIn;
-            return (T)OptIns[key].Create();
+            return OptInFor(prop, () => valueIfNoOptIn);
         }
 
         /// <summary>
