@@ -140,6 +140,18 @@ namespace FluentBuilders.Core
         }
 
         /// <summary>
+        ///  Gets the value/instance set by opt-in for the specified key.
+        /// </summary>
+        /// <typeparam name="T">Type of the value/instance.</typeparam>
+        /// <param name="key">Key of the opt-in</param>
+        /// <param name="valueIfNoOptIn">Value or instance to return if no opt-in was registered for the property.</param>
+        /// <returns></returns>
+        protected T OptInFor<T>(string key, T valueIfNoOptIn)
+        {
+            return OptInFor(key, () => valueIfNoOptIn);
+        }
+
+        /// <summary>
         /// Gets the value/instance set by opt-in for the specified property.
         /// </summary>
         /// <typeparam name="T">Type of the property</typeparam>
