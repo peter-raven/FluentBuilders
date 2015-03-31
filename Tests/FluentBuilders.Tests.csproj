@@ -55,6 +55,7 @@
       <Link>Properties\SolutionInfo.cs</Link>
     </Compile>
     <Compile Include="ChildBuilderForTesting.cs" />
+    <Compile Include="ExampleClassBuilder.cs" />
     <Compile Include="ExampleChildClass.cs" />
     <Compile Include="When_Builder_Uses_Custom_Builder_Factory_Convention.cs" />
     <Compile Include="ExampleClass.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="When_Builder_Create_Is_Invoked.cs" />
     <Compile Include="When_Having_A_CollectionBuilder.cs" />
+    <Compile Include="When_OptIn.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

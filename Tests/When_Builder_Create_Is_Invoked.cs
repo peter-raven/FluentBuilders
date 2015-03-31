@@ -11,7 +11,7 @@ namespace FluentBuilders.Tests
         [Test]
         public void The_Concrete_Builder_Is_Asked_To_Construct()
         {
-            var builder = new BuilderForTesting();
+            var builder = new BuilderForTesting<ExampleClass>();
 
             builder.Create();
 
@@ -21,7 +21,7 @@ namespace FluentBuilders.Tests
         [Test]
         public void The_Concrete_Builder_Is_Asked_To_Construct_With_The_Given_Seed()
         {
-            var builder = new BuilderForTesting();
+            var builder = new BuilderForTesting<ExampleClass>();
 
             builder.Create(42);
 
@@ -31,7 +31,7 @@ namespace FluentBuilders.Tests
         [Test]
         public void The_Created_Instance_Matches_The_Factory_Generic()
         {
-            var builder = new BuilderForTesting();
+            var builder = new BuilderForTesting<ExampleClass>();
 
             object instance = builder.Create();
 
@@ -42,7 +42,7 @@ namespace FluentBuilders.Tests
         public void Customizations_Are_Performed_On_Built_Instance()
         {
             string customString = Generate.RandomString(50);
-            ExampleClass result = new BuilderForTesting()
+            ExampleClass result = new BuilderForTesting<ExampleClass>()
                 .Customize(b => b.StringProp = customString)
                 .Create();
 
@@ -52,7 +52,7 @@ namespace FluentBuilders.Tests
         [Test]
         public void Second_Create_Builds_A_Different_Instance()
         {
-            var builderForTesting = new BuilderForTesting();
+            var builderForTesting = new BuilderForTesting<ExampleClass>();
 
             ExampleClass result1 = builderForTesting.Create();
             ExampleClass result2 = builderForTesting.Create();
@@ -63,7 +63,7 @@ namespace FluentBuilders.Tests
         [Test]
         public void Multiple_Creates_Pass_Seeds_To_Build_Method()
         {
-            var builderForTesting = new BuilderForTesting();
+            var builderForTesting = new BuilderForTesting<ExampleClass>();
 
             builderForTesting.Create(42);
             builderForTesting.Create(1);
@@ -74,7 +74,7 @@ namespace FluentBuilders.Tests
         [Test]
         public void CreateMany_Builds_Different_Instances()
         {
-            var builderForTesting = new BuilderForTesting();
+            var builderForTesting = new BuilderForTesting<ExampleClass>();
 
             ExampleClass[] results = builderForTesting.CreateMany(3).ToArray();
 
@@ -84,7 +84,7 @@ namespace FluentBuilders.Tests
         [Test]
         public void CreateMany_Pass_Sequental_Seeds_To_Build_Method()
         {
-            var builderForTesting = new BuilderForTesting();
+            var builderForTesting = new BuilderForTesting<ExampleClassBuilder>();
 
             builderForTesting.CreateMany(3);
 

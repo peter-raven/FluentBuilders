@@ -88,9 +88,7 @@ namespace FluentBuilders.Core
 
         private void OptInWithBuilder<TNestedBuilder>(Expression<Func<TSubject, object>> prop, TNestedBuilder builder) where TNestedBuilder : IBuilder
         {
-            MemberExpression member = (MemberExpression)prop.Body;
-            string key = member.Member.Name;
-            OptInWithBuilder(key, builder);
+            OptInWithBuilder(GetPropertyName(prop), builder);
         }
 
         private void OptInWithBuilder<TNestedBuilder>(string key, TNestedBuilder builder) where TNestedBuilder : IBuilder
@@ -160,9 +158,7 @@ namespace FluentBuilders.Core
         /// <returns></returns>
         protected T OptInFor<T>(Expression<Func<TSubject, T>> prop, Func<T> valueIfNoOptIn)
         {
-            MemberExpression member = (MemberExpression)prop.Body;
-            string key = member.Member.Name;
-            return OptInFor(key, valueIfNoOptIn);
+            return OptInFor(GetPropertyName(prop), valueIfNoOptIn);
         }
 
         /// <summary>
@@ -238,6 +234,23 @@ namespace FluentBuilders.Core
         public T BuildUsing<T>() where T : IBuilder
         {
             return BuilderFactoryConvention.Create<T>();
+        }
+
+        private string GetPropertyName<T>(Expression<Func<TSubject, T>> expr)
+        {
+            MemberExpression member = expr.Body as MemberExpression;
+            if (member != null)
+                return member.Member.Name;
+
+            UnaryExpression unary = expr.Body as UnaryExpression;
+            if (unary != null)
+            {
+                MemberExpression unaryMember = unary.Operand as MemberExpression;
+                if (unaryMember != null)
+                    return unaryMember.Member.Name;
+            }
+
+            throw new ArgumentException(String.Format("The property expression should point out a member of the class {0}, however the expression does not seem to do so.", typeof(TSubject).Name));
         }
     }
 }

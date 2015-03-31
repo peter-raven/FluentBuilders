@@ -8,7 +8,7 @@ namespace FluentBuilders.Core
 {
     public class SimpleBuilderFactory : IBuilderFactory
     {
-        public T Create<T>()
+        public T Create<T>() where T : IBuilder
         {
             Type type = typeof(T);
             ConstructorInfo[] ctors = type.GetConstructors();

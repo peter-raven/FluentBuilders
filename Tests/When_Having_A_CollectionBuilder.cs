@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using FluentBuilders.Core;
 using NUnit.Framework;
+using NUnit.Framework.Constraints;
 
 namespace FluentBuilders.Tests
 {
@@ -10,7 +11,7 @@ namespace FluentBuilders.Tests
         [Test]
         public void AddOne_Will_Add_Item_Builder_To_Builders()
         {
-            var parentBuilder = new BuilderForTesting();
+            var parentBuilder = new BuilderForTesting<ExampleClass>();
             var t = new CollectionBuilder<ExampleChildClass, ChildBuilderForTesting>(parentBuilder);
 
             t.AddOne();
@@ -22,7 +23,7 @@ namespace FluentBuilders.Tests
         [Test]
         public void AddOne_Will_Return_The_Builder_It_Just_Added_To_Builders()
         {
-            var parentBuilder = new BuilderForTesting();
+            var parentBuilder = new BuilderForTesting<ExampleClass>();
             var t = new CollectionBuilder<ExampleChildClass, ChildBuilderForTesting>(parentBuilder);
 
             var res = t.AddOne();
@@ -33,7 +34,7 @@ namespace FluentBuilders.Tests
         [Test]
         public void AddOne_With_Instance_Will_Add_Item_Builder_With_That_Instance_To_Builders()
         {
-            var parentBuilder = new BuilderForTesting();
+            var parentBuilder = new BuilderForTesting<ExampleClass>();
             var t = new CollectionBuilder<ExampleChildClass, ChildBuilderForTesting>(parentBuilder);
             var c = new ExampleChildClass();
 
@@ -46,7 +47,7 @@ namespace FluentBuilders.Tests
         [Test]
         public void AddMany_With_Instances_Will_Add_Item_Builders_With_These_Instances_To_Builders()
         {
-            var parentBuilder = new BuilderForTesting();
+            var parentBuilder = new BuilderForTesting<ExampleClass>();
             var t = new CollectionBuilder<ExampleChildClass, ChildBuilderForTesting>(parentBuilder);
             var c = new[] { new ExampleChildClass(), new ExampleChildClass(), new ExampleChildClass() };
 
@@ -59,7 +60,7 @@ namespace FluentBuilders.Tests
         [Test]
         public void AddMany_Will_Reuse_Same_Item_Builder()
         {
-            var parentBuilder = new BuilderForTesting();
+            var parentBuilder = new BuilderForTesting<ExampleClass>();
             var t = new CollectionBuilder<ExampleChildClass, ChildBuilderForTesting>(parentBuilder);
             
             t.AddMany(3);
@@ -71,7 +72,7 @@ namespace FluentBuilders.Tests
         [Test]
         public void AddMany_With_Builder_Options_Will_Apply_These_Options_To_Each_Builder()
         {
-            var parentBuilder = new BuilderForTesting();
+            var parentBuilder = new ExampleClassBuilder();
 
             var test = parentBuilder
                 .WithChildren(c => c

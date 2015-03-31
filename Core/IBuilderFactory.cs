@@ -2,6 +2,6 @@
 {
     public interface IBuilderFactory
     {
-        T Create<T>();
+        T Create<T>() where T : IBuilder;
     }
 }

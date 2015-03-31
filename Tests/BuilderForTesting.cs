@@ -1,55 +1,80 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using FluentBuilders.Core;
 
 namespace FluentBuilders.Tests
 {
-    public class BuilderForTesting : Builder<ExampleClass>
+    public class BuilderForTesting<TSubject> : Builder<TSubject> where TSubject : class, new()
     {
-        private CollectionBuilder<ExampleChildClass, ChildBuilderForTesting> _childBuilders;
         public bool WasAskedToConstruct { get; set; }
         public List<int> WasAskedToConstructWithSeeds { get; private set; }
 
         public BuilderForTesting()
         {
             WasAskedToConstructWithSeeds = new List<int>();
-            _childBuilders = new CollectionBuilder<ExampleChildClass, ChildBuilderForTesting>(this);
+        }
+
+        public new void OptInWith<T>(Expression<Func<TSubject, object>> prop, T instance)
+        {
+            base.OptInWith(prop, instance);
+        }
+
+        public new void OptInWith<T>(string key, T instance)
+        {
+            base.OptInWith(key, instance);
+        }
+
+        public new void OptInWith<TNestedBuilder>(Expression<Func<TSubject, object>> prop, Action<TNestedBuilder> opts = null) where TNestedBuilder : IBuilder
+        {
+            base.OptInWith(prop, opts);
+        }
+
+        public new void OptInWith<TNestedBuilder>(string key, Action<TNestedBuilder> opts = null) where TNestedBuilder : IBuilder
+        {
+            base.OptInWith(key, opts);
+        }
+
+        public new bool HasOptInFor<T>(Expression<Func<TSubject, T>> prop)
+        {
+            return base.HasOptInFor(prop);
+        }
+
+        public new bool HasOptInFor(string key)
+        {
+            return base.HasOptInFor(key);
+        }
+
+        public new T OptInFor<T>(string key, Func<T> valueIfNoOptIn)
+        {
+            return base.OptInFor(key, valueIfNoOptIn);
+        }
+
+        public new T OptInFor<T>(string key, T valueIfNoOptIn)
+        {
+            return base.OptInFor(key, valueIfNoOptIn);
+        }
+
+        public new T OptInFor<T>(Expression<Func<TSubject, T>> prop, Func<T> valueIfNoOptIn)
+        {
+            return base.OptInFor(prop, valueIfNoOptIn);
+        }
+
+        public new T OptInFor<T>(Expression<Func<TSubject, T>> prop, T valueIfNoOptIn)
+        {
+            return base.OptInFor(prop, valueIfNoOptIn);
+        }
+
+        public TSubject InvokeBuild(int seed)
+        {
+            return Build(seed);
         }
         
-        public BuilderForTesting WithStringProp(string something)
-        {
-            OptInWith(x => x.StringProp, something);
-            return this;
-        }
-
-        public BuilderForTesting WithReferenceProp(ExampleClass obj)
-        {
-            OptInWith(x => x.ReferenceProp, obj);
-            return this;
-        }
-
-        public BuilderForTesting WithReferenceProp(Action<BuilderForTesting> opts = null)
-        {
-            OptInWith<BuilderForTesting>(x => x.ReferenceProp, opts);
-            return this;
-        }
-
-        public BuilderForTesting WithChildren(Action<CollectionBuilder<ExampleChildClass, ChildBuilderForTesting>> opts)
-        {
-            opts(_childBuilders);
-            return this;
-        }
-
-        protected override ExampleClass Build(int seed)
+        protected override TSubject Build(int seed)
         {
             WasAskedToConstruct = true;
             WasAskedToConstructWithSeeds.Add(seed);
-            var res = new ExampleClass
-            {
-                StringProp = OptInFor(x => x.StringProp, () => "default")
-            };
-            res.ReferenceProp = OptInFor(x => x.ReferenceProp, () => res);
-            res.Children.AddRange(_childBuilders.CreateAll());
+            var res = new TSubject();
 
             return res;
         }
