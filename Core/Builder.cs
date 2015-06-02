@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace FluentBuilders.Core
 {
@@ -9,17 +11,18 @@ namespace FluentBuilders.Core
     /// Abstract base class for fluent builders.
     /// </summary>
     /// <typeparam name="TSubject">Type of object this builder will build.</typeparam>
-    public abstract class Builder<TSubject> : IBuilder<TSubject>
-        where TSubject : class
+    public abstract class Builder<TSubject> : IBuilder<TSubject> where TSubject : class
     {
-        protected Dictionary<string, IBuilder> OptIns { get; set; } 
+        public List<Action> Setups { get; private set; }
+        protected Dictionary<string, IBuilder> PropertyBuilders { get; set; }
         protected readonly List<Action<TSubject>> Customizations;
         public TSubject Instance { get; set; }
         public BuilderFactoryConvention BuilderFactoryConvention { get; set; }
         
         protected Builder()
         {
-            OptIns = new Dictionary<string, IBuilder>();
+            Setups = new List<Action>();
+            PropertyBuilders = new Dictionary<string, IBuilder>();
             Customizations = new List<Action<TSubject>>();
             BuilderFactoryConvention = new BuilderFactoryConvention();
             Instance = null;
@@ -42,9 +45,9 @@ namespace FluentBuilders.Core
         /// <typeparam name="T">The property's type</typeparam>
         /// <param name="prop">Lambda expression pointing out the property</param>
         /// <param name="instance">The instance/value for the property</param>
-        protected void OptInWith<T>(Expression<Func<TSubject, object>> prop, T instance)
+        protected void SetProperty<T>(Expression<Func<TSubject, object>> prop, T instance)
         {
-            OptInWithBuilder(prop, new ObjectContainer<T>(instance));
+            SetPropertyBuilder(prop, new ObjectContainer<T>(instance));
         }
 
         /// <summary>
@@ -53,9 +56,9 @@ namespace FluentBuilders.Core
         /// <typeparam name="T">Type of instance to keep</typeparam>
         /// <param name="key">Key to use for storing</param>
         /// <param name="instance">Instance to keep</param>
-        protected void OptInWith<T>(string key, T instance)
+        protected void SetProperty<T>(string key, T instance)
         {
-            OptInWithBuilder(key, new ObjectContainer<T>(instance));
+            SetPropertyBuilder(key, new ObjectContainer<T>(instance));
         }
 
         /// <summary>
@@ -64,12 +67,12 @@ namespace FluentBuilders.Core
         /// <typeparam name="TNestedBuilder">Type of nested builder</typeparam>
         /// <param name="prop">Lambda expression pointing out the property</param>
         /// <param name="opts">Optional actions to perform on the nested builder.</param>
-        protected void OptInWith<TNestedBuilder>(Expression<Func<TSubject, object>> prop, Action<TNestedBuilder> opts = null) where TNestedBuilder : IBuilder
+        protected void SetProperty<TNestedBuilder>(Expression<Func<TSubject, object>> prop, Action<TNestedBuilder> opts = null) where TNestedBuilder : IBuilder
         {
             TNestedBuilder builder = BuildUsing<TNestedBuilder>();
             if (opts != null)
-                opts(builder);
-            OptInWithBuilder<TNestedBuilder>(prop, builder);
+                builder.Setup(opts); //opts(builder);
+            SetPropertyBuilder<TNestedBuilder>(prop, builder);
         }
 
         /// <summary>
@@ -78,105 +81,185 @@ namespace FluentBuilders.Core
         /// <typeparam name="TNestedBuilder"></typeparam>
         /// <param name="key"></param>
         /// <param name="opts"></param>
-        protected void OptInWith<TNestedBuilder>(string key, Action<TNestedBuilder> opts = null) where TNestedBuilder : IBuilder
+        protected void SetProperty<TNestedBuilder>(string key, Action<TNestedBuilder> opts = null) where TNestedBuilder : IBuilder
         {
             TNestedBuilder builder = BuildUsing<TNestedBuilder>();
             if (opts != null)
-                opts(builder);
-            OptInWithBuilder<TNestedBuilder>(key, builder);
+                builder.Setup(opts);//opts(builder);
+            SetPropertyBuilder<TNestedBuilder>(key, builder);
+        }
+        
+
+        protected void SetCollection<TChild, TChildBuilder>(
+            Expression<Func<TSubject, object>> prop,
+            Action<CollectionBuilder<TChild, TChildBuilder>> opts)
+            where TChild : class
+            where TChildBuilder : Builder<TChild>
+        {
+            var colBuilder = new CollectionBuilder<TChild, TChildBuilder>(this);
+            opts(colBuilder);
+            SetPropertyBuilder(prop, colBuilder);
         }
 
-        private void OptInWithBuilder<TNestedBuilder>(Expression<Func<TSubject, object>> prop, TNestedBuilder builder) where TNestedBuilder : IBuilder
+        protected CollectionBuilder<TChild, TChildBuilder> GetCollection<TChild, TChildBuilder>(Expression<Func<TSubject, object>> prop)
+            where TChild : class
+            where TChildBuilder : Builder<TChild>
         {
-            OptInWithBuilder(GetPropertyName(prop), builder);
+            CollectionBuilder<TChild, TChildBuilder> col = null;
+            string key = GetPropertyName(prop);
+            if (PropertyBuilders.ContainsKey(key))
+            {
+                col = PropertyBuilders[key] as CollectionBuilder<TChild, TChildBuilder>;
+            }
+            if (col == null)
+                col = new CollectionBuilder<TChild, TChildBuilder>(this);
+
+            return col;
         }
 
-        private void OptInWithBuilder<TNestedBuilder>(string key, TNestedBuilder builder) where TNestedBuilder : IBuilder
+        private void SetPropertyBuilder<TNestedBuilder>(Expression<Func<TSubject, object>> prop, TNestedBuilder builder) where TNestedBuilder : IBuilder
         {
-            if (OptIns.ContainsKey(key))
-                OptIns.Remove(key);
-            OptIns.Add(key, builder);
+            SetPropertyBuilder(GetPropertyName(prop), builder);
+        }
+
+        private void SetPropertyBuilder<TNestedBuilder>(string key, TNestedBuilder builder) where TNestedBuilder : IBuilder
+        {
+            if (PropertyBuilders.ContainsKey(key))
+                PropertyBuilders.Remove(key);
+            PropertyBuilders.Add(key, builder);
         }
 
         /// <summary>
-        /// Checks if an opt-in for the specified property exists.
+        /// Checks if property value (or builder that returns a value) has been registered for the specified property.
         /// </summary>
         /// <typeparam name="T">The property's type.</typeparam>
         /// <param name="prop">Lambda expression pointing out the property.</param>
         /// <returns>True if an opt-in exists, otherwise, false.</returns>
-        protected bool HasOptInFor<T>(Expression<Func<TSubject, T>> prop)
+        protected bool HasProperty<T>(Expression<Func<TSubject, T>> prop)
         {
             MemberExpression member = (MemberExpression)prop.Body;
             string key = member.Member.Name;
-            return HasOptInFor(key);
+            return HasProperty(key);
+        }
+
+        [Obsolete("Replace with HasProperty, HasOptInFor will be removed in version 1.0.")]
+        protected bool HasOptInFor<T>(Expression<Func<TSubject, T>> prop)
+        {
+            return HasProperty(prop);
         }
 
         /// <summary>
-        /// Checks if an opt-in for the specified key exists.
+        /// Checks if property value (or builder that returns a value) has been registered for the specified key.
         /// </summary>
         /// <param name="key">Key to check.</param>
-        /// <returns>True if an opt-in exists, otherwise, false.</returns>
-        protected bool HasOptInFor(string key)
+        /// <returns>True if a property value can be resolved, otherwise, false.</returns>
+        protected bool HasProperty(string key)
         {
-            if (!OptIns.ContainsKey(key))
+            if (PropertyBuilders.ContainsKey(key))
                 return true;
             return false;
         }
 
+        [Obsolete("Replace with HasProperty, HasOptInFor will be removed in version 1.0.")]
+        protected bool HasOptInFor(string key)
+        {
+            return HasProperty(key);
+        }
+
         /// <summary>
-        ///  Gets the value/instance set by opt-in for the specified key.
+        /// Gets the builder associated with the specified property.
+        /// </summary>
+        /// <typeparam name="T">Property type</typeparam>
+        /// <param name="prop">Lamnda expression pointing to the property.</param>
+        /// <param name="orUse">Func that returns a default if no builder was registered for the specified property.</param>
+        /// <returns></returns>
+        protected TBuilder GetPropertyBuilder<TBuilder>(Expression<Func<TSubject, object>> prop, Func<TBuilder> orUse)
+        {
+            string key = GetPropertyName(prop);
+            if (PropertyBuilders.ContainsKey(key))
+                return (TBuilder)PropertyBuilders[key];
+
+            return orUse();
+        }
+
+        /// <summary>
+        /// Gets the value/instance set for the specified key.
         /// </summary>
         /// <typeparam name="T">Type of the value/instance.</typeparam>
-        /// <param name="key">Key of the opt-in</param>
-        /// <param name="valueIfNoOptIn">Func that returns a default if no opt-in was registered for the specified key.</param>
+        /// <param name="key">Key for the value/instance</param>
+        /// <param name="orUse">Func that returns a default value if nothing was registered for the specified key.</param>
         /// <returns></returns>
+        protected T GetProperty<T>(string key, Func<T> orUse)
+        {
+            if (!PropertyBuilders.ContainsKey(key))
+                return orUse();
+            return (T)PropertyBuilders[key].Create();
+        }
+
+        [Obsolete("Replace with GetProperty, OptInFor will be removed in version 1.0.")]
         protected T OptInFor<T>(string key, Func<T> valueIfNoOptIn)
         {
-            if (!OptIns.ContainsKey(key))
-                return valueIfNoOptIn();
-            return (T)OptIns[key].Create();
+            return GetProperty(key, valueIfNoOptIn);
         }
 
         /// <summary>
-        ///  Gets the value/instance set by opt-in for the specified key.
+        /// Gets the value/instance set for the specified key.
         /// </summary>
         /// <typeparam name="T">Type of the value/instance.</typeparam>
-        /// <param name="key">Key of the opt-in</param>
-        /// <param name="valueIfNoOptIn">Value or instance to return if no opt-in was registered for the property.</param>
+        /// <param name="key">Key for the value/instance</param>
+        /// <param name="orUse">Value or instance to return if nothing was registered for the specified key.</param>
         /// <returns></returns>
+        protected T GetProperty<T>(string key, T orUse)
+        {
+            return GetProperty(key, () => orUse);
+        }
+
+        [Obsolete("Replace with GetProperty, OptInFor will be removed in version 1.0.")]
         protected T OptInFor<T>(string key, T valueIfNoOptIn)
         {
-            return OptInFor(key, () => valueIfNoOptIn);
+            return GetProperty(key, valueIfNoOptIn);
         }
 
         /// <summary>
-        /// Gets the value/instance set by opt-in for the specified property.
+        /// Gets the value/instance set for the specified property.
         /// </summary>
         /// <typeparam name="T">Type of the property</typeparam>
         /// <param name="prop">Lambda expression pointing to the property</param>
-        /// <param name="valueIfNoOptIn">Func that returns a default if no opt-in was registered for the property.</param>
+        /// <param name="orUse">Func that returns a default if nothing was registered for the property.</param>
         /// <returns></returns>
+        protected T GetProperty<T>(Expression<Func<TSubject, T>> prop, Func<T> orUse)
+        {
+            return GetProperty(GetPropertyName(prop), orUse);
+        }
+
+        [Obsolete("Replace with GetProperty, OptInFor will be removed in version 1.0.")]
         protected T OptInFor<T>(Expression<Func<TSubject, T>> prop, Func<T> valueIfNoOptIn)
         {
-            return OptInFor(GetPropertyName(prop), valueIfNoOptIn);
+            return GetProperty(prop, valueIfNoOptIn);
         }
 
         /// <summary>
-        /// Gets the value/instance set by opt-in for the specified property.
+        /// Gets the value/instance set for the specified property.
         /// </summary>
         /// <typeparam name="T">Type of the property</typeparam>
         /// <param name="prop">Lambda expression pointing to the property</param>
-        /// <param name="valueIfNoOptIn">Value or instance to return if no opt-in was registered for the property.</param>
+        /// <param name="orUse">Value or instance to return if nothing was registered for the property.</param>
         /// <returns></returns>
+        protected T GetProperty<T>(Expression<Func<TSubject, T>> prop, T orUse)
+        {
+            return GetProperty(prop, () => orUse);
+        }
+
+        [Obsolete("Replace with GetProperty, OptInFor will be removed in version 1.0.")]
         protected T OptInFor<T>(Expression<Func<TSubject, T>> prop, T valueIfNoOptIn)
         {
-            return OptInFor(prop, () => valueIfNoOptIn);
+            return GetProperty(prop, valueIfNoOptIn);
         }
 
         /// <summary>
-        /// Adds a customization to the builder that will be applied to the instance being built.
+        /// Adds a customization to the builder that will be applied to the instance being built. Will be applied as the last step in building the instance.
         /// </summary>
-        /// <param name="action">Customization to apply to the built instance. Will be applied as the last step in building the instance.</param>
+        /// <param name="action">Customization to apply to the built instance.</param>
         /// <returns></returns>
         public Builder<TSubject> Customize(Action<TSubject> action)
         {
@@ -191,7 +274,18 @@ namespace FluentBuilders.Core
         /// <returns></returns>
         public virtual TSubject Create(int seed = 0)
         {
-            TSubject subject = Instance ?? Build(seed);
+            TSubject subject;
+            if (Instance != null)
+                subject = Instance;
+            else
+            {
+                foreach (Action setup in Setups)
+                {
+                    setup();
+                }
+                subject = Build(seed);
+            }
+                
             foreach (var cust in Customizations)
                 cust(subject);
             
@@ -203,6 +297,11 @@ namespace FluentBuilders.Core
             return Create(seed);
         }
 
+        /// <summary>
+        /// Implicit operator, enabling you to say MyType = new MyTypeBuilder(); without .Create(), which becomes implicit.
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <returns></returns>
         public static implicit operator TSubject(Builder<TSubject> builder)
         {
             return builder.Create();
@@ -224,6 +323,11 @@ namespace FluentBuilders.Core
             return objs;
         }
 
+        /// <summary>
+        /// Builds an instance using this builder
+        /// </summary>
+        /// <param name="seed"></param>
+        /// <returns></returns>
         protected abstract TSubject Build(int seed);
 
         /// <summary>

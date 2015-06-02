@@ -13,7 +13,7 @@ namespace FluentBuilders.Tests
         public void The_Supplied_Factory_Is_Asked_For_Builder_Instance_Of_Nested_Builder()
         {
             var factory = Substitute.For<IBuilderFactory>();
-            factory.Create<ExampleClassBuilder>().Returns(new ExampleClassBuilder());
+            factory.Create<ExampleReferencedClassBuilder>().Returns(new ExampleReferencedClassBuilder());
             var builder = new ExampleClassBuilder();
             
             builder.BuilderFactoryConvention.UseFactory(factory);
@@ -21,7 +21,7 @@ namespace FluentBuilders.Tests
                 .WithReferenceProp()
                 .Create();
 
-            factory.Received().Create<ExampleClassBuilder>();
+            factory.Received().Create<ExampleReferencedClassBuilder>();
         }
 
         [Test]

@@ -5,40 +5,33 @@ namespace FluentBuilders.Tests
 {
     public class ExampleClassBuilder : Builder<ExampleClass>
     {
-        private CollectionBuilder<ExampleChildClass, ChildBuilderForTesting> _childBuilders;
-
-        public ExampleClassBuilder()
-        {
-            _childBuilders = new CollectionBuilder<ExampleChildClass, ChildBuilderForTesting>(this);
-        }
-
         public ExampleClassBuilder WithStringProp(string something)
         {
-            OptInWith(x => x.StringProp, something);
+            SetProperty(x => x.StringProp, something);
             return this;
         }
 
         public ExampleClassBuilder WithDateTimeProp(DateTime someDate)
         {
-            OptInWith(x => x.DateProp, someDate);
+            SetProperty(x => x.DateProp, someDate);
             return this;
         }
 
         public ExampleClassBuilder WithReferenceProp(ExampleClass obj)
         {
-            OptInWith(x => x.ReferenceProp, obj);
+            SetProperty(x => x.ReferenceProp, obj);
             return this;
         }
 
-        public ExampleClassBuilder WithReferenceProp(Action<ExampleClassBuilder> opts = null)
+        public ExampleClassBuilder WithReferenceProp(Action<ExampleReferencedClassBuilder> opts = null)
         {
-            OptInWith<ExampleClassBuilder>(x => x.ReferenceProp, opts);
+            SetProperty<ExampleReferencedClassBuilder>(x => x.ReferenceProp, opts);
             return this;
         }
 
-        public ExampleClassBuilder WithChildren(Action<CollectionBuilder<ExampleChildClass, ChildBuilderForTesting>> opts)
+        public ExampleClassBuilder WithChildren(Action<CollectionBuilder<ExampleChildClass, ExampleChildClassBuilder>> opts)
         {
-            opts(_childBuilders);
+            SetCollection(x => x.Children, opts);
             return this;
         }
 
@@ -46,12 +39,16 @@ namespace FluentBuilders.Tests
         {
             var res = new ExampleClass
             {
-                StringProp = OptInFor(x => x.StringProp, () => "default"),
-                DateProp = OptInFor(x => x.DateProp, () => DateTime.MinValue)
+                StringProp = GetProperty(x => x.StringProp, () => "default"),
+                DateProp = GetProperty(x => x.DateProp, () => DateTime.MinValue)
             };
-            res.ReferenceProp = OptInFor(x => x.ReferenceProp, () => res);
-            res.Children.AddRange(_childBuilders.CreateAll());
 
+            res.ReferenceProp = GetPropertyBuilder(x => x.ReferenceProp, orUse: BuildUsing<ExampleReferencedClassBuilder>)
+                .WithStringProp("I am default")
+                .Create();
+
+            res.Children.AddRange(GetCollection<ExampleChildClass, ExampleChildClassBuilder>(x => x.Children).CreateAll());
+            
             return res;
         }
     }

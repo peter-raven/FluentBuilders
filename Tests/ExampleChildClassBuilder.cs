@@ -3,18 +3,18 @@ using FluentBuilders.Core;
 
 namespace FluentBuilders.Tests
 {
-    public class ChildBuilderForTesting : Builder<ExampleChildClass>
+    public class ExampleChildClassBuilder : Builder<ExampleChildClass>
     {
         public bool WasAskedToConstruct { get; set; }
         public List<int> WasAskedToConstructWithSeeds { get; private set; }
         public string Something { get; set; }
 
-        public ChildBuilderForTesting()
+        public ExampleChildClassBuilder()
         {
             WasAskedToConstructWithSeeds = new List<int>();
         }
 
-        public ChildBuilderForTesting WithSomething(string something)
+        public ExampleChildClassBuilder WithSomething(string something)
         {
             Something = something;
             return this;

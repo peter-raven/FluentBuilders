@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection.Emit;
 
 namespace FluentBuilders.Core
 {
@@ -13,7 +14,8 @@ namespace FluentBuilders.Core
         /// <returns>The builder with applied alterations.</returns>
         public static TBuilder Setup<TBuilder>(this TBuilder builder, Action<TBuilder> settings) where TBuilder : IBuilder
         {
-            settings(builder);
+            builder.Setups.Add(() => settings(builder));
+            //settings(builder);
             return builder;
         }
 

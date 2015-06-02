@@ -9,7 +9,7 @@ namespace FluentBuilders.Core
     /// </summary>
     /// <typeparam name="T">Type of child entity in the child collection</typeparam>
     /// <typeparam name="TBuilder">Type of builder to build the child entities.</typeparam>
-    public class CollectionBuilder<T, TBuilder>
+    public class CollectionBuilder<T, TBuilder> : Builder<IEnumerable<T>>
         where T : class
         where TBuilder : Builder<T>
     {
@@ -108,6 +108,11 @@ namespace FluentBuilders.Core
                     customization(result);
                 yield return result;
             }
+        }
+
+        protected override IEnumerable<T> Build(int seed)
+        {
+            return CreateAll();
         }
     }
 }

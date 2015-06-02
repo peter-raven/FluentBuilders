@@ -15,54 +15,54 @@ namespace FluentBuilders.Tests
             WasAskedToConstructWithSeeds = new List<int>();
         }
 
-        public new void OptInWith<T>(Expression<Func<TSubject, object>> prop, T instance)
+        public new void SetProperty<T>(Expression<Func<TSubject, object>> prop, T instance)
         {
-            base.OptInWith(prop, instance);
+            base.SetProperty(prop, instance);
         }
 
-        public new void OptInWith<T>(string key, T instance)
+        public new void SetProperty<T>(string key, T instance)
         {
-            base.OptInWith(key, instance);
+            base.SetProperty(key, instance);
         }
 
-        public new void OptInWith<TNestedBuilder>(Expression<Func<TSubject, object>> prop, Action<TNestedBuilder> opts = null) where TNestedBuilder : IBuilder
+        public new void SetProperty<TNestedBuilder>(Expression<Func<TSubject, object>> prop, Action<TNestedBuilder> opts = null) where TNestedBuilder : IBuilder
         {
-            base.OptInWith(prop, opts);
+            base.SetProperty(prop, opts);
         }
 
-        public new void OptInWith<TNestedBuilder>(string key, Action<TNestedBuilder> opts = null) where TNestedBuilder : IBuilder
+        public new void SetProperty<TNestedBuilder>(string key, Action<TNestedBuilder> opts = null) where TNestedBuilder : IBuilder
         {
-            base.OptInWith(key, opts);
+            base.SetProperty(key, opts);
         }
 
-        public new bool HasOptInFor<T>(Expression<Func<TSubject, T>> prop)
+        public new bool HasProperty<T>(Expression<Func<TSubject, T>> prop)
         {
-            return base.HasOptInFor(prop);
+            return base.HasProperty(prop);
         }
 
-        public new bool HasOptInFor(string key)
+        public new bool HasProperty(string key)
         {
-            return base.HasOptInFor(key);
+            return base.HasProperty(key);
         }
 
-        public new T OptInFor<T>(string key, Func<T> valueIfNoOptIn)
+        public new T GetProperty<T>(string key, Func<T> valueIfNoOptIn)
         {
-            return base.OptInFor(key, valueIfNoOptIn);
+            return base.GetProperty(key, valueIfNoOptIn);
         }
 
-        public new T OptInFor<T>(string key, T valueIfNoOptIn)
+        public new T GetProperty<T>(string key, T valueIfNoOptIn)
         {
-            return base.OptInFor(key, valueIfNoOptIn);
+            return base.GetProperty(key, valueIfNoOptIn);
         }
 
-        public new T OptInFor<T>(Expression<Func<TSubject, T>> prop, Func<T> valueIfNoOptIn)
+        public new T GetProperty<T>(Expression<Func<TSubject, T>> prop, Func<T> valueIfNoOptIn)
         {
-            return base.OptInFor(prop, valueIfNoOptIn);
+            return base.GetProperty(prop, valueIfNoOptIn);
         }
 
-        public new T OptInFor<T>(Expression<Func<TSubject, T>> prop, T valueIfNoOptIn)
+        public new T GetProperty<T>(Expression<Func<TSubject, T>> prop, T valueIfNoOptIn)
         {
-            return base.OptInFor(prop, valueIfNoOptIn);
+            return base.GetProperty(prop, valueIfNoOptIn);
         }
 
         public TSubject InvokeBuild(int seed)

@@ -5,6 +5,10 @@ using System.Text;
 
 namespace FluentBuilders.Core
 {
+    /// <summary>
+    /// Very simple builder containing a fixed instance that will be returned on Create.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class ObjectContainer<T> : IBuilder<T>
     {
         public T Value { get; set; }
@@ -30,5 +34,6 @@ namespace FluentBuilders.Core
         }
 
         public BuilderFactoryConvention BuilderFactoryConvention { get; set; }
+        public List<Action> Setups { get; private set; }
     }
 }
