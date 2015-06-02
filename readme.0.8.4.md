@@ -83,14 +83,14 @@ public class ProductBuilder : Builder<Product>
 
 ##Adding fluent syntax opt-in methods
 
-For each property you need to control in your tests, add a method to opt-in and set this property. Use the `SetProperty` helper method, and let it return the builder itself to enable a fluent syntax for setting up your builder:
+For each property you need to control in your tests, add a method to opt-in and set this property. Use the `OptInWith` helper method, and let it return the builder itself to enable a fluent syntax for setting up your builder:
 
 ```csharp
 public class ProductBuilder : Builder<Product>
 {
     public ProductBuilder WithName(string name)
     {
-        SetProperty(x => x.Name, name);
+        OptInWith(x => x.Name, name);
         return this;
     }
 
@@ -98,7 +98,7 @@ public class ProductBuilder : Builder<Product>
     {
         var product = new Product
         {
-            Name = GetProperty(x => x.Name, () => Generate.RandomString(20)),
+            Name = OptInFor(x => x.Name, () => Generate.RandomString(20)),
             Category = Generate.RandomString(15),
             Description = Generate.LoremIpsum(50)
             // ... Give valid defaults to all properties
@@ -108,7 +108,7 @@ public class ProductBuilder : Builder<Product>
 }
 ```
 
-Notice how the Build method uses the opt-in if present using another helper method `GetProperty`, otherwise it sets a default value. This way the valid-object principle is kept.
+Notice how the Build method uses the opt-in if present using another helper method `OptInFor`, otherwise it sets a default value. This way the valid-object principle is kept.
 
 ##Nesting builders
 Notice how this builder example uses a nested builder to create a related entity (customer) if a specific one was not supplied (using the `BuildUsing` base method). This way if the builder was not set up with .WithCustomer, it will create a default one itself, ensuring that a valid Order object is created.
@@ -118,7 +118,7 @@ public class OrderBuilder : Builder<Order>
 {
     public OrderBuilder WithCustomer(Customer customer)
     {
-        SetProperty(x => x.Customer, customer);
+        OptInWith(x => x.Customer, customer);
         return this;
     }
 
@@ -126,7 +126,7 @@ public class OrderBuilder : Builder<Order>
     {
         var order = new Order
         {
-            Customer = GetProperty(x => x.Customer, () => BuildUsing<CustomerBuilder>())
+            Customer = OptInFor(x => x.Customer, () => BuildUsing<CustomerBuilder>())
         };
         return order;
     }
@@ -152,7 +152,7 @@ public class OrderBuilder : Builder<Order>
 {
     public OrderBuilder WithCustomer(Action<CustomerBuilder> opt == null)
     {
-        SetProperty<CustomerBuilder>(x => x.Customer, opt);
+        OptInWith<CustomerBuilder>(x => x.Customer, opt);
         return this;
     }
 
@@ -160,7 +160,7 @@ public class OrderBuilder : Builder<Order>
     {
         var order = new Order
         {
-            Customer = GetProperty(x => x.Customer, () => BuildUsing<CustomerBuilder>())
+            Customer = OptInFor(x => x.Customer, () => BuildUsing<CustomerBuilder>())
         };
         return order;
     }
@@ -183,11 +183,18 @@ For this you need to use the `CollectionBuilder`:
 ```csharp
 public class OrderBuilder : Builder<Order>
 {
+    private CollectionBuilder<OrderLine, OrderLineBuilder> _orderLineBuilders;
+
+    public OrderBuilder()
+    {
+        _orderLineBuilders = new CollectionBuilder<OrderLine, OrderLineBuilder>(this);
+    }
+
     // ...
 
-    public OrderBuilder WithOrderLines(Action<CollectionBuilder<OrderLine, OrderLineBuilder>> orderLineAction)
+    public OrderBuilder WithOrderLines(Action<CollectionBuilder<OrderLine, OrderLineBuilder>> opts)
     {
-        SetCollection(x => x.OrderLines, orderLineAction)
+        opts(_orderLineBuilders);
         return this;
     }
 
@@ -196,7 +203,7 @@ public class OrderBuilder : Builder<Order>
         var order = new Order();
         // ...
 
-        order.OrderLines.AddRange(GetCollection<OrderLine, OrderLineBuilder>(x => x.OrderLines).CreateAll());
+        order.OrderLines.AddRange(_orderLineBuilders.CreateAll());
         return order;
     }
 }
